@@ -2,33 +2,40 @@ using UnityEngine;
 
 public class MovingObjective : MonoBehaviour
 {
-    public Transform pointA; // Primer punto
-    public Transform pointB; // Segundo punto
+    private Vector3 areaMin = new Vector3(-5, 0.5f, -5);
+    private Vector3 areaMax = new Vector3(5, 0.5f, 5);
     public float speed = 3f; // Velocidad de movimiento
-    private bool movingToB = true;
+    private Vector3 targetPosition; // Posición objetivo actual
+
+    void Start()
+    {
+        SetNewRandomTarget();
+    }
 
     void Update()
     {
-        // Movimiento entre dos puntos
-        if (movingToB)
+        // Mover la esfera hacia el objetivo
+        transform.position = Vector3.MoveTowards(transform.position, targetPosition, speed * Time.deltaTime);
+
+        // Si ha llegado al objetivo, genera uno nuevo
+        if (Vector3.Distance(transform.position, targetPosition) < 0.1f)
         {
-            transform.position = Vector3.MoveTowards(transform.position, pointB.position, speed * Time.deltaTime);
-            if (Vector3.Distance(transform.position, pointB.position) < 0.1f)
-                movingToB = false;
-        }
-        else
-        {
-            transform.position = Vector3.MoveTowards(transform.position, pointA.position, speed * Time.deltaTime);
-            if (Vector3.Distance(transform.position, pointA.position) < 0.1f)
-                movingToB = true;
+            SetNewRandomTarget();
         }
     }
 
-    private void OnTriggerEnter(Collider other)
+    public void SetNewRandomTarget()
     {
-        if (other.CompareTag("Player"))
-        {
-            gameObject.SetActive(false);
-        }
+        // Generar una nueva posición aleatoria dentro del área definida
+        float x = Random.Range(areaMin.x, areaMax.x);
+        float z = Random.Range(areaMin.z, areaMax.z);
+        targetPosition = new Vector3(x, transform.position.y, z); // Mantener la altura constante
+    }
+
+    public void TeleportRandom()
+    {
+        float x = Random.Range(areaMin.x, areaMax.x);
+        float z = Random.Range(areaMin.z, areaMax.z);
+        transform.position = new Vector3(x, transform.position.y, z);
     }
 }
