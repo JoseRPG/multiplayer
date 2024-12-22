@@ -1,20 +1,17 @@
 using UnityEngine;
+using Mirror;
 
-public class PlayerController : MonoBehaviour
+public class PlayerController : NetworkBehaviour
 {
-    public float moveSpeed = 5f; // Velocidad de movimiento del personaje
-    public float rotationSpeed = 720f; // Velocidad de rotación del personaje (en grados por segundo)
-
-    private Rigidbody rb;
-
-    void Start()
-    {
-        rb = GetComponent<Rigidbody>();
-    }
+    public float moveSpeed = 5f; // Velocidad del personaje
+    public float rotationSpeed = 720f; // Velocidad de rotación
 
     void Update()
     {
-        // Obtener entrada de teclado
+        // Controlar únicamente al jugador local
+        if (!isLocalPlayer) return;
+
+        // Obtener entrada del teclado
         float moveHorizontal = Input.GetAxis("Horizontal");
         float moveVertical = Input.GetAxis("Vertical");
 
@@ -27,8 +24,8 @@ public class PlayerController : MonoBehaviour
             Quaternion targetRotation = Quaternion.LookRotation(movement, Vector3.up);
             transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, rotationSpeed * Time.deltaTime);
 
-            // Aplicar movimiento
-            rb.MovePosition(rb.position + movement * moveSpeed * Time.deltaTime);
+            // Aplicar movimiento local
+            transform.position += movement * moveSpeed * Time.deltaTime;
         }
     }
 }
