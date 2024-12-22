@@ -5,6 +5,8 @@ public class PlayerController : NetworkBehaviour
 {
     public float moveSpeed = 5f; // Velocidad del personaje
     public float rotationSpeed = 720f; // Velocidad de rotación
+    public int score = 0; // Puntuación inicial
+    public int maxScore = 3; // Puntuación máxima para ganar
 
     void Update()
     {
@@ -26,6 +28,27 @@ public class PlayerController : NetworkBehaviour
 
             // Aplicar movimiento local
             transform.position += movement * moveSpeed * Time.deltaTime;
+        }
+
+    }
+    // Incrementar la puntuación al colisionar con el objetivo
+    void OnTriggerEnter(Collider other)
+    {
+        if (other.gameObject.name == "Objetivo")
+        {
+            score++;
+            Debug.Log("Score: " + score);
+            if (score >= maxScore)
+            {
+                Debug.Log("¡Has ganado!");
+                //cambiar mi color a rojo
+                GetComponent<Renderer>().material.color = Color.red;
+            }
+            // Volver a generar esfera
+            other.gameObject.SetActive(false);
+            other.GetComponent<MovingObjective>().TeleportRandom();
+            other.GetComponent<MovingObjective>().SetNewRandomTarget();
+            other.gameObject.SetActive(true);
         }
     }
 }
