@@ -10,6 +10,8 @@ public class PlayerController : NetworkBehaviour
 
     [SyncVar(hook = nameof(OnColorChanged))] // Sincroniza el color entre el servidor y los clientes
     private Color playerColor = Color.white; // Color inicial del jugador
+    
+    public Canvas winCanvas;
 
     private Renderer playerRenderer;
 
@@ -19,6 +21,12 @@ public class PlayerController : NetworkBehaviour
 
         // Aplicar el color inicial al jugador
         playerRenderer.material.color = playerColor;
+
+        // Asegurarse de que el Canvas esté inicialmente desactivado
+        if (winCanvas != null)
+        {
+            winCanvas.gameObject.SetActive(false);
+        }
     }
 
     void Update()
@@ -57,6 +65,11 @@ public class PlayerController : NetworkBehaviour
             if (score >= maxScore)
             {
                 Debug.Log("¡Has ganado!");
+                // Mostrar el Canvas al ganar
+                if (winCanvas != null)
+                {
+                    winCanvas.gameObject.SetActive(true);
+                }
                 // Notificar al servidor para cambiar el color
                 CmdChangeColor(Color.red);
             }
