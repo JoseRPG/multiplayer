@@ -92,6 +92,11 @@ public class PlayerController : NetworkBehaviour
         if (other.gameObject.CompareTag("Objetivo"))
         {
             score++;
+            // Activar la animación de ataque
+            if (!isAttacking)
+            {
+                isAttacking = true;
+            }
 
             if (score >= maxScore)
             {
@@ -101,12 +106,9 @@ public class PlayerController : NetworkBehaviour
                 {
                     winCanvas.gameObject.SetActive(true);
                 }
-                // Activar la animación de ataque
-                if (!isAttacking)
-                {
-                    isAttacking = true;
-                }
+                
             }
+            
             // Notificar al servidor sobre la colisión
             CmdHandleObjectiveCollision(other.gameObject);
         }
