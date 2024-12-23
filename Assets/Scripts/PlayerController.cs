@@ -18,6 +18,9 @@ public class PlayerController : NetworkBehaviour
     private bool isAttacking = false; // Bandera para evitar múltiples ataques simultáneos
     private Renderer playerRenderer;
 
+    public GameObject CrazyCat_Red; // Objeto CrazyCat_Red
+    public GameObject CrazyCat_Black; // Objeto CrazyCat_Black
+
     void Start()
     {
         playerRenderer = GetComponent<Renderer>();
@@ -40,6 +43,11 @@ public class PlayerController : NetworkBehaviour
         if (weapon != null)
         {
             initialWeaponRotation = weapon.localRotation;
+        }
+
+        if (isServer)
+        {
+            AssignCrazyCat(); // Configura el CrazyCat en el servidor
         }
     }
 
@@ -138,6 +146,37 @@ public class PlayerController : NetworkBehaviour
         if (movingObjective != null)
         {
             movingObjective.TeleportAndSetNewTarget();
+        }
+    }
+
+    [Server]
+    private void AssignCrazyCat()
+    {
+        int playerIndex = NetworkServer.connections.Count;
+
+        if (playerIndex == 1)
+        {
+            RpcConfigureCrazyCat(true, false); // Primer jugador: CrazyCat_Red
+        }
+        else if (playerIndex == 2)
+        {
+            RpcConfigureCrazyCat(false, true); // Segundo jugador: CrazyCat_Black
+        }else {
+            RpcConfigureCrazyCat(false, true);
+        }
+    }
+
+    [ClientRpc]
+    private void RpcConfigureCrazyCat(bool enableRed, bool enableBlack)
+    {
+        if (CrazyCat_Red != null)
+        {
+            CrazyCat_Red.SetActive(enableRed);
+        }
+
+        if (CrazyCat_Black != null)
+        {
+            CrazyCat_Black.SetActive(enableBlack);
         }
     }
 }
