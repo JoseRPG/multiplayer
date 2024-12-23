@@ -7,8 +7,11 @@ public class PlayerController : NetworkBehaviour
     public float rotationSpeed = 720f; // Velocidad de rotación
     public int score = 0; // Puntuación inicial
     public int maxScore = 3; // Puntuación máxima para ganar
+    private CanvasManager canvasManager;
     private Color playerColor = Color.white; // Color inicial del jugador
     public Canvas winCanvas;
+
+    public Canvas winCanvasVR;
     public Transform weapon; // Referencia al arma (el cilindro)
     public float attackSpeed = 2f; // Velocidad de la animación de ataque
     private Quaternion initialWeaponRotation; // Rotación inicial del arma
@@ -22,10 +25,16 @@ public class PlayerController : NetworkBehaviour
         // Aplicar el color inicial al jugador
         playerRenderer.material.color = playerColor;
 
-        // Asegurarse de que el Canvas esté inicialmente desactivado
-        if (winCanvas != null)
+        canvasManager = FindObjectOfType<CanvasManager>();
+
+        if (canvasManager == null)
         {
-            winCanvas.gameObject.SetActive(false);
+            Debug.LogError("CanvasManager no encontrado en la escena.");
+        }
+        // Guardar la rotación inicial del arma
+        if (weapon != null)
+        {
+            initialWeaponRotation = weapon.localRotation;
         }
         // Guardar la rotación inicial del arma
         if (weapon != null)
@@ -102,9 +111,16 @@ public class PlayerController : NetworkBehaviour
             {
                 Debug.Log("¡Has ganado!");
                 // Mostrar el Canvas al ganar
-                if (winCanvas != null)
+                if (canvasManager != null)
                 {
-                    winCanvas.gameObject.SetActive(true);
+                    if (UnityEngine.XR.XRSettings.isDeviceActive) // Detección VR
+                    {
+                        canvasManager.ShowVrCanvas();
+                    }
+                    else
+                    {
+                        canvasManager.ShowNonVrCanvas();
+                    }
                 }
                 
             }

@@ -492,6 +492,8 @@ MonoBehaviour:
   rotationSpeed: 720
   score: 0
   maxScore: 3
+  winCanvas: {fileID: 0}
+  winCanvasVR: {fileID: 0}
   weapon: {fileID: 2114364828377551319}
   attackSpeed: 20
 --- !u!82 &-3646955406959552902
@@ -504,7 +506,7 @@ AudioSource:
   m_Enabled: 1
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 0}
+  m_audioClip: {fileID: 8300000, guid: c3706b270462e7847ab2118ae97a618c, type: 3}
   m_PlayOnAwake: 1
   m_Volume: 0.023
   m_Pitch: 1
