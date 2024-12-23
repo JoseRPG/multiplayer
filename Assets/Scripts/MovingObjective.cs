@@ -29,6 +29,13 @@ public class MovingObjective : NetworkBehaviour
     [Server]
     private void MoveTowardsTarget()
     {
+        // Orientar el ratón hacia el objetivo
+        Vector3 direction = targetPosition - transform.position;
+        if (direction != Vector3.zero) // Evitar problemas con vectores nulos
+        {
+            transform.rotation = Quaternion.LookRotation(direction); // Girar hacia el objetivo
+        }
+        
         // Mover la esfera hacia el objetivo
         transform.position = Vector3.MoveTowards(transform.position, targetPosition, speed * Time.deltaTime);
 
