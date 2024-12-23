@@ -7,12 +7,12 @@ public class PlayerController : NetworkBehaviour
     public float rotationSpeed = 720f; // Velocidad de rotación
     public int score = 0; // Puntuación inicial
     public int maxScore = 3; // Puntuación máxima para ganar
-
-    [SyncVar(hook = nameof(OnColorChanged))] // Sincroniza el color entre el servidor y los clientes
     private Color playerColor = Color.white; // Color inicial del jugador
-    
     public Canvas winCanvas;
-
+    public Transform weapon; // Referencia al arma (el cilindro)
+    public float attackSpeed = 2f; // Velocidad de la animación de ataque
+    private Quaternion initialWeaponRotation; // Rotación inicial del arma
+    private bool isAttacking = false; // Bandera para evitar múltiples ataques simultáneos
     private Renderer playerRenderer;
 
     void Start()
@@ -27,6 +27,11 @@ public class PlayerController : NetworkBehaviour
         {
             winCanvas.gameObject.SetActive(false);
         }
+        // Guardar la rotación inicial del arma
+        if (weapon != null)
+        {
+            initialWeaponRotation = weapon.localRotation;
+        }
     }
 
     void Update()
@@ -34,6 +39,18 @@ public class PlayerController : NetworkBehaviour
         // Controlar únicamente al jugador local
         if (!isLocalPlayer) return;
 
+        // Mover al jugador
+        HandleMovement();
+
+        // Animar el arma si está atacando
+        if (isAttacking && weapon != null)
+        {
+            AnimateWeaponAttack();
+        }
+    }
+
+    private void HandleMovement()
+    {
         // Obtener entrada del teclado
         float moveHorizontal = Input.GetAxis("Horizontal");
         float moveVertical = Input.GetAxis("Vertical");
@@ -52,7 +69,22 @@ public class PlayerController : NetworkBehaviour
         }
     }
 
-    // Incrementar la puntuación al colisionar con el objetivo
+    private void AnimateWeaponAttack()
+    {
+        // Inclinación objetivo del arma
+        Quaternion attackRotation = Quaternion.Euler(90, 0, 0);
+
+        // Interpolar hacia la rotación de ataque
+        weapon.localRotation = Quaternion.Lerp(weapon.localRotation, attackRotation, attackSpeed * Time.deltaTime);
+
+        // Restaurar la rotación inicial después de completar el ataque
+        if (Quaternion.Angle(weapon.localRotation, attackRotation) < 1f)
+        {
+            isAttacking = false;
+            weapon.localRotation = initialWeaponRotation;
+        }
+    }
+
     void OnTriggerEnter(Collider other)
     {
         if (!isLocalPlayer) return;
@@ -60,7 +92,6 @@ public class PlayerController : NetworkBehaviour
         if (other.gameObject.CompareTag("Objetivo"))
         {
             score++;
-            Debug.Log("Score: " + score);
 
             if (score >= maxScore)
             {
@@ -70,10 +101,12 @@ public class PlayerController : NetworkBehaviour
                 {
                     winCanvas.gameObject.SetActive(true);
                 }
-                // Notificar al servidor para cambiar el color
-                CmdChangeColor(Color.red);
+                // Activar la animación de ataque
+                if (!isAttacking)
+                {
+                    isAttacking = true;
+                }
             }
-
             // Notificar al servidor sobre la colisión
             CmdHandleObjectiveCollision(other.gameObject);
         }
@@ -88,19 +121,5 @@ public class PlayerController : NetworkBehaviour
         {
             movingObjective.TeleportAndSetNewTarget();
         }
-    }
-
-    [Command]
-    private void CmdChangeColor(Color newColor)
-    {
-        // Cambiar el color en el servidor
-        playerColor = newColor;
-    }
-
-    private void OnColorChanged(Color oldColor, Color newColor)
-    {
-        // Actualizar el color localmente cuando cambie
-        Debug.Log($"Color cambiado de {oldColor} a {newColor}");
-        playerRenderer.material.color = newColor;
     }
 }
