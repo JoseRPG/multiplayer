@@ -40,9 +40,11 @@ PlayerSettings:
     width: 1
     height: 1
   m_SplashScreenLogos:
-  - logo: {fileID: 21300000, guid: 3bf149dfbb9c4024a8c3ff6024580c90, type: 3}
+  - logo: {fileID: 21300000, guid: 842349c099851a14580b35f5ce0216bc, type: 3}
     duration: 2
-  - logo: {fileID: 21300000, guid: d59e7db53039ea04b953160239900820, type: 3}
+  - logo: {fileID: 21300000, guid: a7f45e8aa2300e744bef147abb0ed95a, type: 3}
+    duration: 2
+  - logo: {fileID: 21300000, guid: 72fd1f5a2dc58d94aa5a331fbfca2f88, type: 3}
     duration: 2
   m_VirtualRealitySplashScreen: {fileID: 0}
   m_HolographicTrackingLossScreen: {fileID: 0}
@@ -144,7 +146,9 @@ PlayerSettings:
   visionOSBundleVersion: 1.0
   tvOSBundleVersion: 1.0
   bundleVersion: 0.1
-  preloadedAssets: []
+  preloadedAssets:
+  - {fileID: 11400000, guid: 5c7f3a106bfb02b4e8c090dbada7a7ec, type: 2}
+  - {fileID: 4404459467471878253, guid: 0c304ce93b7c4fa4199a5c56274eb0cb, type: 2}
   metroInputSource: 0
   wsaTransparentSwapchain: 0
   m_HolographicPauseOnTrackingLoss: 1
