@@ -42,7 +42,6 @@ public class MovingObjective : NetworkBehaviour
     [Server]
     private void SetNewRandomTarget()
     {
-        Debug.Log("Generando un nuevo objetivo aleatorio en el servidor.");
         // Generar una nueva posición aleatoria dentro del área definida
         float x = Random.Range(areaMin.x, areaMax.x);
         float z = Random.Range(areaMin.z, areaMax.z);
@@ -52,7 +51,6 @@ public class MovingObjective : NetworkBehaviour
     [Server]
     public void TeleportAndSetNewTarget()
     {
-        Debug.Log("Teletransportando el objetivo y estableciendo un nuevo target en el servidor.");
         // Teletransportar el objetivo a una posición aleatoria
         float x = Random.Range(areaMin.x, areaMax.x);
         float z = Random.Range(areaMin.z, areaMax.z);
@@ -68,7 +66,6 @@ public class MovingObjective : NetworkBehaviour
     [ClientRpc]
     private void RpcUpdateObjectivePosition(Vector3 newPosition, Vector3 newTarget)
     {
-        Debug.Log("Actualizando posición del objetivo en los clientes.");
         // Actualizar posición y objetivo localmente en los clientes
         transform.position = newPosition;
         targetPosition = newTarget;
