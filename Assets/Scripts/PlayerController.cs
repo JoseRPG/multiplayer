@@ -8,6 +8,19 @@ public class PlayerController : NetworkBehaviour
     public int score = 0; // Puntuación inicial
     public int maxScore = 3; // Puntuación máxima para ganar
 
+    [SyncVar(hook = nameof(OnColorChanged))] // Sincroniza el color entre el servidor y los clientes
+    private Color playerColor = Color.white; // Color inicial del jugador
+
+    private Renderer playerRenderer;
+
+    void Start()
+    {
+        playerRenderer = GetComponent<Renderer>();
+
+        // Aplicar el color inicial al jugador
+        playerRenderer.material.color = playerColor;
+    }
+
     void Update()
     {
         // Controlar únicamente al jugador local
@@ -29,26 +42,52 @@ public class PlayerController : NetworkBehaviour
             // Aplicar movimiento local
             transform.position += movement * moveSpeed * Time.deltaTime;
         }
-
     }
+
     // Incrementar la puntuación al colisionar con el objetivo
     void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject.name == "Objetivo")
+        if (!isLocalPlayer) return;
+
+        if (other.gameObject.CompareTag("Objetivo"))
         {
             score++;
             Debug.Log("Score: " + score);
+
             if (score >= maxScore)
             {
                 Debug.Log("¡Has ganado!");
-                //cambiar mi color a rojo
-                GetComponent<Renderer>().material.color = Color.red;
+                // Notificar al servidor para cambiar el color
+                CmdChangeColor(Color.red);
             }
-            // Volver a generar esfera
-            other.gameObject.SetActive(false);
-            other.GetComponent<MovingObjective>().TeleportRandom();
-            other.GetComponent<MovingObjective>().SetNewRandomTarget();
-            other.gameObject.SetActive(true);
+
+            // Notificar al servidor sobre la colisión
+            CmdHandleObjectiveCollision(other.gameObject);
         }
+    }
+
+    [Command]
+    private void CmdHandleObjectiveCollision(GameObject objetivo)
+    {
+        // Llamar al método en el servidor para teletransportar el objetivo
+        MovingObjective movingObjective = objetivo.GetComponent<MovingObjective>();
+        if (movingObjective != null)
+        {
+            movingObjective.TeleportAndSetNewTarget();
+        }
+    }
+
+    [Command]
+    private void CmdChangeColor(Color newColor)
+    {
+        // Cambiar el color en el servidor
+        playerColor = newColor;
+    }
+
+    private void OnColorChanged(Color oldColor, Color newColor)
+    {
+        // Actualizar el color localmente cuando cambie
+        Debug.Log($"Color cambiado de {oldColor} a {newColor}");
+        playerRenderer.material.color = newColor;
     }
 }
