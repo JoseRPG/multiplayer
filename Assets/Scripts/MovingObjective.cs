@@ -1,34 +1,76 @@
 using UnityEngine;
+using Mirror;
 
-public class MovingObjective : MonoBehaviour
+public class MovingObjective : NetworkBehaviour
 {
-    public Transform pointA; // Primer punto
-    public Transform pointB; // Segundo punto
+    private Vector3 areaMin = new Vector3(-5, 0.5f, -5);
+    private Vector3 areaMax = new Vector3(5, 0.5f, 5);
     public float speed = 3f; // Velocidad de movimiento
-    private bool movingToB = true;
 
-    void Update()
+    [SyncVar] // Sincroniza esta variable entre el servidor y los clientes
+    private Vector3 targetPosition; // Posición objetivo actual
+
+    void Start()
     {
-        // Movimiento entre dos puntos
-        if (movingToB)
+        if (isServer) // Solo el servidor establece el primer objetivo
         {
-            transform.position = Vector3.MoveTowards(transform.position, pointB.position, speed * Time.deltaTime);
-            if (Vector3.Distance(transform.position, pointB.position) < 0.1f)
-                movingToB = false;
-        }
-        else
-        {
-            transform.position = Vector3.MoveTowards(transform.position, pointA.position, speed * Time.deltaTime);
-            if (Vector3.Distance(transform.position, pointA.position) < 0.1f)
-                movingToB = true;
+            SetNewRandomTarget();
         }
     }
 
-    private void OnTriggerEnter(Collider other)
+    void Update()
     {
-        if (other.CompareTag("Player"))
+        if (isServer) // Solo el servidor controla el movimiento
         {
-            gameObject.SetActive(false);
+            MoveTowardsTarget();
         }
+    }
+
+    [Server]
+    private void MoveTowardsTarget()
+    {
+        // Mover la esfera hacia el objetivo
+        transform.position = Vector3.MoveTowards(transform.position, targetPosition, speed * Time.deltaTime);
+
+        // Si ha llegado al objetivo, genera uno nuevo
+        if (Vector3.Distance(transform.position, targetPosition) < 0.1f)
+        {
+            SetNewRandomTarget();
+        }
+    }
+
+    [Server]
+    private void SetNewRandomTarget()
+    {
+        Debug.Log("Generando un nuevo objetivo aleatorio en el servidor.");
+        // Generar una nueva posición aleatoria dentro del área definida
+        float x = Random.Range(areaMin.x, areaMax.x);
+        float z = Random.Range(areaMin.z, areaMax.z);
+        targetPosition = new Vector3(x, transform.position.y, z); // Mantener la altura constante
+    }
+
+    [Server]
+    public void TeleportAndSetNewTarget()
+    {
+        Debug.Log("Teletransportando el objetivo y estableciendo un nuevo target en el servidor.");
+        // Teletransportar el objetivo a una posición aleatoria
+        float x = Random.Range(areaMin.x, areaMax.x);
+        float z = Random.Range(areaMin.z, areaMax.z);
+        transform.position = new Vector3(x, transform.position.y, z);
+
+        // Establecer un nuevo objetivo
+        SetNewRandomTarget();
+
+        // Notificar a los clientes para que sincronicen la posición
+        RpcUpdateObjectivePosition(transform.position, targetPosition);
+    }
+
+    [ClientRpc]
+    private void RpcUpdateObjectivePosition(Vector3 newPosition, Vector3 newTarget)
+    {
+        Debug.Log("Actualizando posición del objetivo en los clientes.");
+        // Actualizar posición y objetivo localmente en los clientes
+        transform.position = newPosition;
+        targetPosition = newTarget;
     }
 }
