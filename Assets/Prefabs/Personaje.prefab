@@ -352,6 +352,8 @@ MonoBehaviour:
   rotationSpeed: 720
   score: 0
   maxScore: 3
+  winCanvas: {fileID: 0}
+  winCanvasVR: {fileID: 0}
 --- !u!82 &-3646955406959552902
 AudioSource:
   m_ObjectHideFlags: 0

@@ -7,11 +7,14 @@ public class PlayerController : NetworkBehaviour
     public float rotationSpeed = 720f; // Velocidad de rotación
     public int score = 0; // Puntuación inicial
     public int maxScore = 3; // Puntuación máxima para ganar
+    private CanvasManager canvasManager;
 
     [SyncVar(hook = nameof(OnColorChanged))] // Sincroniza el color entre el servidor y los clientes
     private Color playerColor = Color.white; // Color inicial del jugador
     
     public Canvas winCanvas;
+
+    public Canvas winCanvasVR;
 
     private Renderer playerRenderer;
 
@@ -22,10 +25,11 @@ public class PlayerController : NetworkBehaviour
         // Aplicar el color inicial al jugador
         playerRenderer.material.color = playerColor;
 
-        // Asegurarse de que el Canvas esté inicialmente desactivado
-        if (winCanvas != null)
+        canvasManager = FindObjectOfType<CanvasManager>();
+
+        if (canvasManager == null)
         {
-            winCanvas.gameObject.SetActive(false);
+            Debug.LogError("CanvasManager no encontrado en la escena.");
         }
     }
 
@@ -66,9 +70,16 @@ public class PlayerController : NetworkBehaviour
             {
                 Debug.Log("¡Has ganado!");
                 // Mostrar el Canvas al ganar
-                if (winCanvas != null)
+                if (canvasManager != null)
                 {
-                    winCanvas.gameObject.SetActive(true);
+                    if (UnityEngine.XR.XRSettings.isDeviceActive) // Detección VR
+                    {
+                        canvasManager.ShowVrCanvas();
+                    }
+                    else
+                    {
+                        canvasManager.ShowNonVrCanvas();
+                    }
                 }
                 // Notificar al servidor para cambiar el color
                 CmdChangeColor(Color.red);
