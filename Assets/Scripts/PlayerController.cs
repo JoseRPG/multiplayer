@@ -7,17 +7,26 @@ public class PlayerController : NetworkBehaviour
     public float rotationSpeed = 720f; // Velocidad de rotación
     public int score = 0; // Puntuación inicial
     public int maxScore = 3; // Puntuación máxima para ganar
+    private Color playerColor = Color.white; // Color inicial del jugador
+    public Canvas winCanvas;
     public Transform weapon; // Referencia al arma (el cilindro)
     public float attackSpeed = 2f; // Velocidad de la animación de ataque
     private Quaternion initialWeaponRotation; // Rotación inicial del arma
     private bool isAttacking = false; // Bandera para evitar múltiples ataques simultáneos
-
     private Renderer playerRenderer;
 
     void Start()
     {
         playerRenderer = GetComponent<Renderer>();
 
+        // Aplicar el color inicial al jugador
+        playerRenderer.material.color = playerColor;
+
+        // Asegurarse de que el Canvas esté inicialmente desactivado
+        if (winCanvas != null)
+        {
+            winCanvas.gameObject.SetActive(false);
+        }
         // Guardar la rotación inicial del arma
         if (weapon != null)
         {
@@ -83,18 +92,23 @@ public class PlayerController : NetworkBehaviour
         if (other.gameObject.CompareTag("Objetivo"))
         {
             score++;
-
-            if (score >= maxScore)
-            {
-                Debug.Log("¡Has ganado!");
-            }
-
             // Activar la animación de ataque
             if (!isAttacking)
             {
                 isAttacking = true;
             }
 
+            if (score >= maxScore)
+            {
+                Debug.Log("¡Has ganado!");
+                // Mostrar el Canvas al ganar
+                if (winCanvas != null)
+                {
+                    winCanvas.gameObject.SetActive(true);
+                }
+                
+            }
+            
             // Notificar al servidor sobre la colisión
             CmdHandleObjectiveCollision(other.gameObject);
         }
