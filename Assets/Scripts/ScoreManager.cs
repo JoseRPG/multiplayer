@@ -6,7 +6,7 @@ public class CanvasTextManager : MonoBehaviour
     public Text vrText;       // Referencia al texto del Canvas VR
     public Text nonVrText;    // Referencia al texto del Canvas no VR
     public Canvas ScoreCanvas; // Referencia al Canvas de puntuación
-    public Canvas ScoreCanvasVR;
+    public GameObject ScoreCanvasVR;
     private PlayerController playerController; // Referencia al script con la variable pública
 
     void Start()
@@ -39,7 +39,7 @@ public class CanvasTextManager : MonoBehaviour
         }
         else
         {
-            string scoreText = "Puntuación: " + playerController.score.ToString();
+            string scoreText = "Puntuación: " ;
 
             if (UnityEngine.XR.XRSettings.isDeviceActive)
             {
