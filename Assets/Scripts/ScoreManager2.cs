@@ -19,6 +19,10 @@ public class ScoreManager2 : NetworkBehaviour
     // Objeto que se activará al ganar
     public GameObject victoryObject;
 
+    public float victoryDisplayTime = 20f; // Tiempo para mostrar la pantalla de victoria
+
+    private MovingObjective movingObjective;
+
     void Start()
     {
         if (canvasManager == null)
@@ -28,6 +32,8 @@ public class ScoreManager2 : NetworkBehaviour
         {
             victoryObject.SetActive(false);
         }
+
+        movingObjective = FindObjectOfType<MovingObjective>();
     }
 
     void Update()
@@ -63,7 +69,7 @@ public class ScoreManager2 : NetworkBehaviour
         CheckForVictory(newScore, 2);
     }
 
-    private void CheckForVictory(int score, int playerNumber)
+private void CheckForVictory(int score, int playerNumber)
     {
         if (score >= maxScore)
         {
@@ -85,6 +91,15 @@ public class ScoreManager2 : NetworkBehaviour
                     canvasManager.ShowNonVrCanvas();
                 }
             }
+
+            // Pausar el objetivo
+            if (movingObjective != null)
+            {
+                movingObjective.Pause();
+            }
+
+            // Inicia el reinicio después de un tiempo
+            Invoke(nameof(ResetGame), victoryDisplayTime);
         }
     }
 
@@ -94,22 +109,25 @@ public class ScoreManager2 : NetworkBehaviour
         {
             score1 = 0;
             score2 = 0;
-
-            CheckVictoryObjectVisibility(); // Verifica si debe ocultar el objeto
         }
     }
 
-    public void EndGame()
+    public void ResetGame()
     {
         if (isServer)
         {
             ResetScores(); // Reinicia los puntajes
-            Debug.Log("Cerrando la partida...");
-            NetworkManager.singleton.StopHost();
-        }
-        else
-        {
-            Debug.LogWarning("Solo el servidor puede cerrar la partida.");
+
+            if (victoryObject != null)
+            {
+                victoryObject.SetActive(false); // Oculta el objeto de victoria
+            }
+
+            // Reactivar el objetivo
+            if (movingObjective != null)
+            {
+                movingObjective.Reactivate();
+            }
         }
     }
 
